@@ -1,8 +1,8 @@
 train_config:
-  num_train_steps: 500000
+  train_type: "PPO"
+  env_name: "CartPole-v1"
+  num_train_steps: 150000
   evaluate_every_epochs: 1000
-  num_devices: 1
-  device_type: "gpu"
   
   num_train_envs: 8
   max_grad_norm: 0.5
@@ -18,20 +18,14 @@ train_config:
   entropy_coeff: 0.01 # "Entropy loss coefficient"
   critic_coeff: 0.5  # "Value loss coefficient"
 
-  problem_name: "Gym"
-  problem_train_config:
-    env_name: "CartPole-v1"
-    num_env_steps: 200
-    num_rollouts: 20
-  problem_test_config:
-    env_name: "CartPole-v1"
-    num_env_steps: 200
-    num_rollouts: 164
-
-  network_name: "MLP-Separate"
+  network_name: "Categorical-MLP"
   network_config:
     num_hidden_units: 64
     num_hidden_layers: 2
+
+  problem_test_config:
+    num_env_steps: 200
+    num_rollouts: 164
 
 log_config:
   time_to_track: ["imp_iter"]
@@ -40,3 +34,7 @@ log_config:
   print_every_k_updates: 1
   overwrite: 1
   model_type: "jax"
+
+device_config:
+  num_devices: 1
+  device_type: "gpu"

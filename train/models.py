@@ -17,7 +17,7 @@ def get_model_ready(rng, config):
             **config.network_config, num_output_units=env.num_actions
         )
     elif config.train_type == "PPO":
-        if config.network_name == "Categorial-MLP":
+        if config.network_name == "Categorical-MLP":
             model = CategoricalSeparateMLP(
                 **config.network_config, num_output_units=env.num_actions
             )

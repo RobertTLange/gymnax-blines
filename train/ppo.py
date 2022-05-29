@@ -33,9 +33,7 @@ def train_ppo(rng, config, model, params):
     )
 
     best_reward_yet, best_model_ckpt = -jnp.inf, None
-    rollout_manager = RolloutManager(
-        config.problem_train_config.env_name, model
-    )
+    rollout_manager = RolloutManager(config.env_name, model)
 
     batch_manager = BatchManager(
         discount=config.gamma,
@@ -60,6 +58,7 @@ def train_ppo(rng, config, model, params):
         )
         new_key, key_step = jax.random.split(new_key)
         b_rng = jax.random.split(key_step, num_train_envs)
+        # Automatic env resetting in gymnax step!
         next_obs, next_state, reward, done, _ = rollout_manager.batch_step(
             b_rng, state, action
         )

@@ -5,7 +5,6 @@ import flax
 from flax.training.train_state import TrainState
 from typing import Any, Callable, Tuple
 import gymnax
-from brax import envs
 
 
 class BatchManager:
@@ -116,28 +115,9 @@ class RolloutManager(object):
     def __init__(self, env_name, model, gen_vmap_dict=None):
         # Setup functionalities for vectorized batch rollout
         self.env_name = env_name
-        if self.env_name in ["CartPole-v1", "Acrobot-v1", "Pendulum-v1"]:
-            self.env, self.env_params = gymnax.make(env_name)
-            self.batch_step = self.batch_step_gymnax
-            self.batch_reset = self.batch_reset_gymnax
-            self.observation_space = self.env.observation_space(self.env_params)
-            self.action_size = ()
-        elif self.env_name in [
-            "ant",
-            "halfcheetah",
-            "hopper",
-            "humanoid",
-            "reacher",
-            "walker2d",
-            "fetch",
-            "grasp",
-            "ur5e",
-        ]:
-            self.env = envs.create(env_name=self.env_name)
-            self.batch_step = self.batch_step_brax
-            self.batch_reset = self.batch_reset_brax
-            self.observation_space = self.env.observation_size
-            self.action_size = (self.env.action_size,)
+        self.env, self.env_params = gymnax.make(env_name)
+        self.observation_space = self.env.observation_space(self.env_params)
+        self.action_size = self.env.action_space(self.env_params).shape
         self.apply_fn = model.apply
         self.gen_vmap_dict = gen_vmap_dict
         self.select_action = self.select_action_ppo
@@ -163,32 +143,16 @@ class RolloutManager(object):
         return action, log_prob, value[:, 0], rng
 
     @partial(jax.jit, static_argnums=0)
-    def batch_reset_gymnax(self, keys):
+    def batch_reset(self, keys):
         return jax.vmap(self.env.reset, in_axes=(0, None))(
             keys, self.env_params
         )
 
     @partial(jax.jit, static_argnums=0)
-    def batch_step_gymnax(self, keys, state, action):
+    def batch_step(self, keys, state, action):
         return jax.vmap(self.env.step, in_axes=(0, 0, 0, None))(
             keys, state, action, self.env_params
         )
-
-    @partial(jax.jit, static_argnums=0)
-    def batch_reset_brax(self, keys):
-        state = jax.vmap(self.env.reset, in_axes=(0))(keys)
-        return state.obs, state
-
-    @partial(jax.jit, static_argnums=0)
-    def batch_step_brax(self, keys, state, action):
-        state = jax.vmap(
-            self.env.step,
-            in_axes=(
-                0,
-                0,
-            ),
-        )(state, action)
-        return state.obs, state, state.reward, state.done, 0
 
     @partial(jax.jit, static_argnums=(0, 3, 4))
     def batch_evaluate(self, rng_input, train_state, num_eval_steps, num_envs):
