@@ -1,6 +1,6 @@
 train_config:
   train_type: "ES"
-  env_name: "CartPole-v1"
+  env_name: "Acrobot-v1"
   num_generations: 100
   evaluate_every_gen: 5
 

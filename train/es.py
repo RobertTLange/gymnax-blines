@@ -1,6 +1,5 @@
 import jax
 import jax.numpy as jnp
-import tqdm
 from evosax import (
     ProblemMapper,
     Strategies,
@@ -10,7 +9,7 @@ from evosax import (
 )
 
 
-def train_es(rng, config, model, params):
+def train_es(rng, config, log, model, params):
     """Evolve a policy for a gymnax environment"""
     # Setup evaluation wrappers from evosax - uses gymnax backend!
     train_evaluator = ProblemMapper["Gym"](
@@ -30,8 +29,18 @@ def train_es(rng, config, model, params):
     test_param_reshaper = ParameterReshaper(params, n_devices=1)
 
     # Augment the evaluation wrappers for batch (pop/mc) evaluation
-    train_evaluator.set_apply_fn(train_param_reshaper.vmap_dict, model.apply)
-    test_evaluator.set_apply_fn(test_param_reshaper.vmap_dict, model.apply)
+    if config.network_name != "LSTM":
+        train_evaluator.set_apply_fn(
+            train_param_reshaper.vmap_dict, model.apply
+        )
+        test_evaluator.set_apply_fn(test_param_reshaper.vmap_dict, model.apply)
+    else:
+        train_evaluator.set_apply_fn(
+            train_param_reshaper.vmap_dict, model.apply, model.initialize_carry
+        )
+        test_evaluator.set_apply_fn(
+            test_param_reshaper.vmap_dict, model.apply, model.initialize_carry
+        )
 
     # Set up the fitness shaping utility (max/centered ranks, etc.)
     fit_shaper = FitnessShaper(**config.fitness_config.toDict())
@@ -48,9 +57,6 @@ def train_es(rng, config, model, params):
     es_state = strategy.initialize(rng, es_params)
     best_perf_yet, best_model_ckpt = -jnp.inf, None
 
-    t = tqdm.tqdm(
-        range(1, config.num_generations + 1), desc="ES Run", leave=True
-    )
     es_logging = ESLog(
         train_param_reshaper.total_params,
         config.num_generations,
@@ -59,7 +65,7 @@ def train_es(rng, config, model, params):
     )
     es_log = es_logging.initialize()
 
-    for gen in t:
+    for gen in range(config.num_generations):
         rng, rng_ask, rng_eval = jax.random.split(rng, 3)
         # Ask for new parameter proposals and reshape into paramter trees.
         x, es_state = strategy.ask(rng_ask, es_state, es_params)
@@ -96,8 +102,16 @@ def train_es(rng, config, model, params):
                     es_state["mean"]
                 )
 
-        t.set_description("R " + str(best_perf_yet))
-        t.refresh()
+            log.update(
+                {"num_steps": gen + 1},
+                {"return": test_fitness_to_log[1]},
+                model={
+                    "params": train_param_reshaper.reshape_single(
+                        es_state["mean"]
+                    )
+                },
+                save=True,
+            )
     return (
         {"params": best_model_ckpt},
         best_perf_yet,

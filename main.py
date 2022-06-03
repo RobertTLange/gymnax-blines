@@ -17,12 +17,15 @@ def main(config, log):
         raise ValueError("Unknown train_type ('ES', 'PPO').")
 
     # Log and store the results.
-    train_fn(rng, config, model, params)
+    train_fn(rng, config, log, model, params)
 
 
 if __name__ == "__main__":
     from mle_toolbox import MLExperiment
 
     # Setup experiment run (visible GPUs for JAX parallelism)
-    mle = MLExperiment(config_fname="configs/cartpole_ppo.yaml")
+    mle = MLExperiment(config_fname="configs/cartpole/ppo.yaml")
     main(mle.train_config, mle.log)
+
+    # Notes
+    # - problem with mountain car -> ES doesnt work no signal?

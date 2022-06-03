@@ -1,20 +1,24 @@
 train_config:
   train_type: "ES"
-  env_name: "CartPole-v1"
-  num_generations: 100
-  evaluate_every_gen: 5
+  env_name: "BernoulliBandit-misc"
+  # TODO: Add env args to configs!
+  env_kwargs: {}
+  env_params:
+    reward_prob: 0.25
+  num_generations: 1500
+  evaluate_every_gen: 100
 
   es_name: "OpenES"
   es_config:
-    popsize: 100
+    popsize: 256
     opt_name: "adam"
   es_params:
-    lrate_init: 0.04
+    lrate_init: 0.01
     lrate_decay: 0.999
     lrate_limit: 0.001
-    sigma_init: 0.03
+    sigma_init: 0.2
     sigma_decay: 0.999
-    sigma_limit: 0.01
+    sigma_limit: 0.005
 
   fitness_config:
     maximize: true
@@ -23,17 +27,15 @@ train_config:
     w_decay: 0.0
   
   problem_train_config:
-    num_env_steps: 200
+    num_env_steps: 100
     num_rollouts: 20
   problem_test_config:
-    num_env_steps: 200
+    num_env_steps: 100
     num_rollouts: 164
 
-  network_name: "MLP"
+  network_name: "LSTM"
   network_config: 
-    num_hidden_units: 64
-    num_hidden_layers: 2
-    hidden_activation: "relu"
+    num_hidden_units: 16
     output_activation: "categorical"
 
 log_config:

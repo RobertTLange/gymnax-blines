@@ -2,7 +2,6 @@ from functools import partial
 import optax
 import jax
 import jax.numpy as jnp
-import tqdm
 from train.ppo_utils import BatchManager, RolloutManager
 from typing import Any, Callable, Tuple
 from collections import defaultdict
@@ -11,7 +10,7 @@ from flax.training.train_state import TrainState
 import numpy as np
 
 
-def train_ppo(rng, config, model, params):
+def train_ppo(rng, config, log, model, params):
     num_total_epochs = int(config.num_train_steps // config.num_train_envs + 1)
     num_steps_warm_up = int(config.num_train_steps * config.lr_warmup)
     schedule_fn = optax.linear_schedule(
@@ -74,10 +73,8 @@ def train_ppo(rng, config, model, params):
         jax.random.split(rng_reset, config.num_train_envs)
     )
 
-    t = tqdm.tqdm(range(1, num_total_epochs), desc="PPO Run", leave=True)
-
     total_steps = 0
-    for step in t:
+    for step in range(num_total_epochs):
         train_state, obs, state, batch, rng_step = get_transition(
             train_state,
             obs,
@@ -114,8 +111,12 @@ def train_ppo(rng, config, model, params):
                 best_reward_yet = rewards
                 best_model_ckpt = dict(train_state.params)
 
-            t.set_description("R " + str(best_reward_yet))
-            t.refresh()
+            log.update(
+                {"num_steps": total_steps},
+                {"return": rewards},
+                model=train_state.params,
+                save=True,
+            )
 
     return (
         best_model_ckpt,

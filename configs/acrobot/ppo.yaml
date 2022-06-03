@@ -1,11 +1,11 @@
 train_config:
   train_type: "PPO"
-  env_name: "CartPole-v1"
-  num_train_steps: 150000
+  env_name: "Acrobot-v1"
+  num_train_steps: 500000
   evaluate_every_epochs: 1000
   
-  num_train_envs: 8
-  max_grad_norm: 0.5
+  num_train_envs: 16
+  max_grad_norm: 1.0
   gamma: 0.99  # Discount factor
   n_steps: 32 # "GAE n-steps"
   n_minibatch: 4 # "Number of PPO minibatches"

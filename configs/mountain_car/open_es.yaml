@@ -1,20 +1,20 @@
 train_config:
   train_type: "ES"
-  env_name: "CartPole-v1"
-  num_generations: 100
+  env_name: "MountainCar-v0"
+  num_generations: 1000
   evaluate_every_gen: 5
 
   es_name: "OpenES"
   es_config:
-    popsize: 100
+    popsize: 256
     opt_name: "adam"
   es_params:
-    lrate_init: 0.04
+    lrate_init: 0.001
     lrate_decay: 0.999
     lrate_limit: 0.001
-    sigma_init: 0.03
+    sigma_init: 0.1
     sigma_decay: 0.999
-    sigma_limit: 0.01
+    sigma_limit: 0.001
 
   fitness_config:
     maximize: true

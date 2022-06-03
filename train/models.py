@@ -28,7 +28,13 @@ def get_model_ready(rng, config):
 
     # Initialize the network based on the observation shape
     obs_shape = env.observation_space(env_params).shape
-    params = model.init(rng, jnp.zeros(obs_shape), rng=rng)
+
+    if config.network_name != "LSTM":
+        params = model.init(rng, jnp.zeros(obs_shape), rng=rng)
+    else:
+        params = model.init(
+            rng, jnp.zeros(obs_shape), model.initialize_carry(), rng=rng
+        )
     return model, params
 
 
