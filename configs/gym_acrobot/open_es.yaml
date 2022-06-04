@@ -1,9 +1,9 @@
 train_config:
   train_type: "ES"
-  num_generations: 10000
-  evaluate_every_gen: 100
+  num_generations: 100
+  evaluate_every_gen: 5
 
-  env_name: "PointRobot-misc"
+  env_name: "Acrobot-v1"
   env_kwargs: {}
   env_params: {}
   num_test_rollouts: 164
@@ -11,26 +11,28 @@ train_config:
 
   es_name: "OpenES"
   es_config:
-    popsize: 256
+    popsize: 100
     opt_name: "adam"
   es_params:
-    lrate_init: 0.01
+    lrate_init: 0.04
     lrate_decay: 0.999
     lrate_limit: 0.001
-    sigma_init: 0.1
+    sigma_init: 0.03
     sigma_decay: 0.999
-    sigma_limit: 0.001
+    sigma_limit: 0.01
 
   fitness_config:
     maximize: true
     centered_rank: true
     z_score: false
     w_decay: 0.0
-
-  network_name: "LSTM"
+  
+  network_name: "MLP"
   network_config: 
-    num_hidden_units: 32
-    output_activation: "identity"
+    num_hidden_units: 64
+    num_hidden_layers: 2
+    hidden_activation: "relu"
+    output_activation: "categorical"
 
 log_config:
   time_to_track: ["num_steps"]

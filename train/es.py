@@ -13,18 +13,23 @@ def train_es(rng, config, log, model, params):
     """Evolve a policy for a gymnax environment"""
     # Setup evaluation wrappers from evosax - uses gymnax backend!
     train_evaluator = ProblemMapper["Gym"](
-        **config.problem_train_config.toDict(),
+        num_rollouts=config.num_train_rollouts,
         env_name=config.env_name,
+        env_kwargs=config.env_kwargs,
+        env_params=config.env_params,
         test=False,
     )
     test_evaluator = ProblemMapper["Gym"](
-        **config.problem_test_config.toDict(),
+        num_rollouts=config.num_test_rollouts,
         env_name=config.env_name,
+        env_kwargs=config.env_kwargs,
+        env_params=config.env_params,
         n_devices=1,
         test=True,
     )
 
     # Set up model reshaping tools (from flat vector to network param dict)
+    # Training can be on multiple devices while eval is done only for two nets
     train_param_reshaper = ParameterReshaper(params)
     test_param_reshaper = ParameterReshaper(params, n_devices=1)
 
@@ -52,7 +57,7 @@ def train_es(rng, config, log, model, params):
     )
 
     es_params = strategy.default_params
-    for k, v in config.es_params.toDict().items():
+    for k, v in config.es_params.items():
         es_params[k] = v
     es_state = strategy.initialize(rng, es_params)
     best_perf_yet, best_model_ckpt = -jnp.inf, None

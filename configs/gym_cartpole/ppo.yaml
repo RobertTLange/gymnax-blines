@@ -1,11 +1,15 @@
 train_config:
   train_type: "PPO"
-  env_name: "CartPole-v1"
   num_train_steps: 150000
   evaluate_every_epochs: 1000
+
+  env_name: "CartPole-v1"
+  env_kwargs: {}
+  env_params: {}
+  num_test_rollouts: 164
   
-  num_train_envs: 8
-  max_grad_norm: 0.5
+  num_train_envs: 8  # Number of parallel env workers
+  max_grad_norm: 0.5  # Global norm to clip gradients by
   gamma: 0.99  # Discount factor
   n_steps: 32 # "GAE n-steps"
   n_minibatch: 4 # "Number of PPO minibatches"
@@ -22,10 +26,6 @@ train_config:
   network_config:
     num_hidden_units: 64
     num_hidden_layers: 2
-
-  problem_test_config:
-    num_env_steps: 200
-    num_rollouts: 164
 
 log_config:
   time_to_track: ["num_steps"]

@@ -1,33 +1,31 @@
 train_config:
   train_type: "ES"
-  env_name: "Acrobot-v1"
-  num_generations: 100
-  evaluate_every_gen: 5
+  num_generations: 1000
+  evaluate_every_gen: 50
+
+  env_name: "MountainCar-v0"
+  env_kwargs: {}
+  env_params: {}
+  num_test_rollouts: 164
+  num_train_rollouts: 20
 
   es_name: "OpenES"
   es_config:
-    popsize: 100
+    popsize: 256
     opt_name: "adam"
   es_params:
-    lrate_init: 0.04
+    lrate_init: 0.001
     lrate_decay: 0.999
     lrate_limit: 0.001
-    sigma_init: 0.03
+    sigma_init: 0.1
     sigma_decay: 0.999
-    sigma_limit: 0.01
+    sigma_limit: 0.001
 
   fitness_config:
     maximize: true
     centered_rank: true
     z_score: false
     w_decay: 0.0
-  
-  problem_train_config:
-    num_env_steps: 200
-    num_rollouts: 20
-  problem_test_config:
-    num_env_steps: 200
-    num_rollouts: 164
 
   network_name: "MLP"
   network_config: 

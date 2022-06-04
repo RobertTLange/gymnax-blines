@@ -112,22 +112,15 @@ class BatchManager:
 
 
 class RolloutManager(object):
-    def __init__(self, env_name, model, gen_vmap_dict=None):
+    def __init__(self, model, env_name, env_kwargs, env_params):
         # Setup functionalities for vectorized batch rollout
         self.env_name = env_name
-        self.env, self.env_params = gymnax.make(env_name)
+        self.env, self.env_params = gymnax.make(env_name, env_kwargs)
+        self.env_params.replace(**env_params)
         self.observation_space = self.env.observation_space(self.env_params)
         self.action_size = self.env.action_space(self.env_params).shape
         self.apply_fn = model.apply
-        self.gen_vmap_dict = gen_vmap_dict
         self.select_action = self.select_action_ppo
-
-    @partial(jax.jit, static_argnums=(0, 3, 4))
-    def gen_evaluate(self, rng, param_dicts, num_eval_steps, num_eval_envs):
-        eval_fct = jax.vmap(
-            self.batch_evaluate, in_axes=(None, self.gen_vmap_dict, None, None)
-        )
-        return eval_fct(rng, param_dicts, num_eval_steps, num_eval_envs)
 
     @partial(jax.jit, static_argnums=0)
     def select_action_ppo(
@@ -137,8 +130,7 @@ class RolloutManager(object):
         rng: jax.random.PRNGKey,
     ) -> Tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, jax.random.PRNGKey]:
         value, pi = policy(train_state.apply_fn, train_state.params, obs, rng)
-        rng, key = jax.random.split(rng)
-        action = pi.sample(seed=key)
+        action = pi.sample(seed=rng)
         log_prob = pi.log_prob(action)
         return action, log_prob, value[:, 0], rng
 
@@ -154,8 +146,8 @@ class RolloutManager(object):
             keys, state, action, self.env_params
         )
 
-    @partial(jax.jit, static_argnums=(0, 3, 4))
-    def batch_evaluate(self, rng_input, train_state, num_eval_steps, num_envs):
+    @partial(jax.jit, static_argnums=(0, 3))
+    def batch_evaluate(self, rng_input, train_state, num_envs):
         """Rollout a pendulum episode with lax.scan."""
         # Reset the environment
         rng_reset, rng_episode = jax.random.split(rng_input)
@@ -165,7 +157,7 @@ class RolloutManager(object):
             """lax.scan compatible step transition in jax env."""
             obs, state, train_state, rng = state_input
             rng, rng_step, rng_net = jax.random.split(rng, 3)
-            action, _, _, key = self.select_action(train_state, obs, rng_net)
+            action, _, _ = self.select_action(train_state, obs, rng_net)
             # action = jnp.nan_to_num(action, nan=0.0)
             next_o, next_s, reward, done, _ = self.batch_step(
                 jax.random.split(rng_step, num_envs),
@@ -179,14 +171,16 @@ class RolloutManager(object):
         _, scan_out = jax.lax.scan(
             policy_step,
             [obs, state, train_state, rng_episode],
-            [jnp.zeros((num_eval_steps, num_envs, 2))],
+            [jnp.zeros((self.env_params.max_steps_in_episode, num_envs, 2))],
         )
         # Return the sum of rewards accumulated by agent in episode rollout
         rewards, dones = scan_out[0], scan_out[1]
-        rewards = rewards.reshape(num_eval_steps, num_envs, 1)
-        dones = dones.reshape(num_eval_steps, num_envs, 1)
+        rewards = rewards.reshape(
+            self.env_params.max_steps_in_episode, num_envs, 1
+        )
+        dones = dones.reshape(self.env_params.max_steps_in_episode, num_envs, 1)
         ep_mask = (jnp.cumsum(dones, axis=0) < 1).reshape(
-            num_eval_steps, num_envs, 1
+            self.env_params.max_steps_in_episode, num_envs, 1
         )
         return jnp.mean(jnp.sum(rewards * ep_mask, axis=0))
 

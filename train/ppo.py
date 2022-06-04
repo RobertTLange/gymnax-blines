@@ -11,6 +11,7 @@ import numpy as np
 
 
 def train_ppo(rng, config, log, model, params):
+    """Training loop for PPO based on https://github.com/bmazoure/ppo_jax."""
     num_total_epochs = int(config.num_train_steps // config.num_train_envs + 1)
     num_steps_warm_up = int(config.num_train_steps * config.lr_warmup)
     schedule_fn = optax.linear_schedule(
@@ -32,7 +33,11 @@ def train_ppo(rng, config, log, model, params):
     )
 
     best_reward_yet, best_model_ckpt = -jnp.inf, None
-    rollout_manager = RolloutManager(config.env_name, model)
+
+    # Setup the rollout manager -> Collects data in vmapped-fashion over envs
+    rollout_manager = RolloutManager(
+        model, config.env_name, config.env_kwargs, config.env_params
+    )
 
     batch_manager = BatchManager(
         discount=config.gamma,
@@ -104,8 +109,7 @@ def train_ppo(rng, config, log, model, params):
             rewards = rollout_manager.batch_evaluate(
                 rng_eval,
                 train_state,
-                config.problem_test_config.num_env_steps,
-                config.problem_test_config.num_rollouts,
+                config.num_test_rollouts,
             )
             if rewards > best_reward_yet:
                 best_reward_yet = rewards
@@ -195,7 +199,7 @@ def update(
     critic_coeff: float,
     rng: jax.random.PRNGKey,
 ):
-
+    """Perform multiple epochs of updates with multiple updates."""
     obs, action, log_pi_old, value, target, gae = batch
     size_batch = num_envs * n_steps
     size_minibatch = size_batch // n_minibatch
