@@ -29,4 +29,4 @@ if __name__ == "__main__":
     from gymnax.visualize import Visualizer
 
     vis = Visualizer(env, env_params, state_seq)
-    vis.animate(f"test_{env_name}.gif")
+    vis.animate(f"docs/test_{env_name}.gif")
