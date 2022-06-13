@@ -56,9 +56,12 @@ def train_es(rng, config, log, model, params):
         **config.es_config.toDict(),
     )
 
-    es_params = strategy.default_params
-    for k, v in config.es_params.items():
-        es_params[k] = v
+    es_params = strategy.default_params.replace(**config.es_params)
+    # Setup optimizer parameters separately
+    if "opt_params" in config.keys():
+        es_params = es_params.replace(
+            opt_params=es_params.opt_params.replace(**config.opt_params)
+        )
     es_state = strategy.initialize(rng, es_params)
     best_perf_yet, best_model_ckpt = -jnp.inf, None
 
@@ -92,7 +95,7 @@ def train_es(rng, config, log, model, params):
             rng, rng_test = jax.random.split(rng)
             # Stack best params seen & mean strategy params for eval
             best_params = es_log["top_params"][0]
-            mean_params = es_state["mean"]
+            mean_params = es_state.mean
             x_test = jnp.stack([best_params, mean_params], axis=0)
             reshaped_test_params = test_param_reshaper.reshape(x_test)
             test_fitness = test_evaluator.rollout(
@@ -104,22 +107,18 @@ def train_es(rng, config, log, model, params):
             if test_fitness_to_log[1] > best_perf_yet:
                 best_perf_yet = test_fitness_to_log[1]
                 best_model_ckpt = train_param_reshaper.reshape_single(
-                    es_state["mean"]
+                    es_state.mean
                 )
 
             log.update(
                 {"num_steps": gen + 1},
                 {"return": test_fitness_to_log[1]},
-                model={
-                    "params": train_param_reshaper.reshape_single(
-                        es_state["mean"]
-                    )
-                },
+                model=train_param_reshaper.reshape_single(es_state.mean),
                 save=True,
             )
     return (
-        {"params": best_model_ckpt},
+        best_model_ckpt,
         best_perf_yet,
-        {"params": train_param_reshaper.reshape_single(es_state["mean"])},
+        train_param_reshaper.reshape_single(es_state.mean),
         test_fitness_to_log[1],
     )

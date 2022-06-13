@@ -15,12 +15,13 @@ train_config:
     popsize: 256
     opt_name: "adam"
   es_params:
-    lrate_init: 0.01
-    lrate_decay: 0.999
-    lrate_limit: 0.001
     sigma_init: 0.2
     sigma_decay: 0.999
     sigma_limit: 0.005
+  opt_params:
+    lrate_init: 0.01
+    lrate_decay: 0.999
+    lrate_limit: 0.001
 
   fitness_config:
     maximize: true
