@@ -61,7 +61,7 @@ class BatchManager:
                 buffer["states"], buffer["_p"], state
             ),
             "actions": jax.ops.index_update(
-                buffer["actions"], buffer["_p"], action.squeeze()
+                buffer["actions"], buffer["_p"], action
             ),
             "rewards": jax.ops.index_update(
                 buffer["rewards"], buffer["_p"], reward.squeeze()

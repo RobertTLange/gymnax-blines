@@ -58,6 +58,7 @@ def train_ppo(rng, config, model, params, mle_log):
         action, log_pi, value, new_key = rollout_manager.select_action(
             train_state, obs, rng
         )
+        # print(action.shape)
         new_key, key_step = jax.random.split(new_key)
         b_rng = jax.random.split(key_step, num_train_envs)
         # Automatic env resetting in gymnax step!
@@ -153,10 +154,9 @@ def loss_actor_and_critic(
     value_pred, pi = apply_fn(params_model, obs, rng=None)
     value_pred = value_pred[:, 0]
 
-    # print(action.shape)
     # TODO: Figure out why training without 0 breaks categorical model
     # And why with 0 breaks gaussian model pi
-    log_prob = pi.log_prob(action[:, 0])
+    log_prob = pi.log_prob(action[:, -1])
 
     value_pred_clipped = value_old + (value_pred - value_old).clip(
         -clip_eps, clip_eps
@@ -266,6 +266,7 @@ def update_epoch(
     critic_coeff: float,
 ):
     for idx in idxes:
+        # print(action[idx].shape, action[idx].reshape(-1, 1).shape)
         grad_fn = jax.value_and_grad(loss_actor_and_critic, has_aux=True)
         total_loss, grads = grad_fn(
             train_state.params,
@@ -275,7 +276,8 @@ def update_epoch(
             value_old=value[idx],
             log_pi_old=log_pi_old[idx],
             gae=gae[idx],
-            action=action[idx].reshape(-1, 1),
+            # action=action[idx].reshape(-1, 1),
+            action=jnp.expand_dims(action[idx], -1),
             clip_eps=clip_eps,
             critic_coeff=critic_coeff,
             entropy_coeff=entropy_coeff,

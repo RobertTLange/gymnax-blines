@@ -96,7 +96,7 @@ def main(config, mle_log):
 
     save_pkl_object(
         data_to_store,
-        f"agents/{config.env_name}/{config.train_type}/ckpt.pkl",
+        f"agents/{config.env_name}/{config.train_type.lower()}.pkl",
     )
 
 
