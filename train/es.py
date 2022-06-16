@@ -7,9 +7,10 @@ from evosax import (
     FitnessShaper,
     ParameterReshaper,
 )
+import tqdm
 
 
-def train_es(rng, config, log, model, params):
+def train_es(rng, config, model, params, mle_log):
     """Evolve a policy for a gymnax environment"""
     # Setup evaluation wrappers from evosax - uses gymnax backend!
     train_evaluator = ProblemMapper["Gym"](
@@ -63,8 +64,6 @@ def train_es(rng, config, log, model, params):
             opt_params=es_params.opt_params.replace(**config.opt_params)
         )
     es_state = strategy.initialize(rng, es_params)
-    best_perf_yet, best_model_ckpt = -jnp.inf, None
-
     es_logging = ESLog(
         train_param_reshaper.total_params,
         config.num_generations,
@@ -73,7 +72,9 @@ def train_es(rng, config, log, model, params):
     )
     es_log = es_logging.initialize()
 
-    for gen in range(config.num_generations):
+    log_steps, log_return = [], []
+    t = tqdm.tqdm(range(1, config.num_generations + 1), desc="ES", leave=True)
+    for gen in t:
         rng, rng_ask, rng_eval = jax.random.split(rng, 3)
         # Ask for new parameter proposals and reshape into paramter trees.
         x, es_state = strategy.ask(rng_ask, es_state, es_params)
@@ -102,23 +103,21 @@ def train_es(rng, config, log, model, params):
                 rng_test, reshaped_test_params
             )
 
-            test_fitness_to_log = test_fitness.mean(axis=1)
+            test_fitness_to_log = test_fitness.mean(axis=1)[1]
+            log_steps.append(train_evaluator.total_env_steps)
+            log_return.append(test_fitness_to_log)
+            t.set_description(f"R: {str(test_fitness_to_log)}")
+            t.refresh()
 
-            if test_fitness_to_log[1] > best_perf_yet:
-                best_perf_yet = test_fitness_to_log[1]
-                best_model_ckpt = train_param_reshaper.reshape_single(
-                    es_state.mean
+            if mle_log is not None:
+                mle_log.update(
+                    {"num_steps": train_evaluator.total_env_steps},
+                    {"return": test_fitness_to_log},
+                    model=train_param_reshaper.reshape_single(es_state.mean),
+                    save=True,
                 )
-
-            log.update(
-                {"num_steps": gen + 1},
-                {"return": test_fitness_to_log[1]},
-                model=train_param_reshaper.reshape_single(es_state.mean),
-                save=True,
-            )
     return (
-        best_model_ckpt,
-        best_perf_yet,
+        log_steps,
+        log_return,
         train_param_reshaper.reshape_single(es_state.mean),
-        test_fitness_to_log[1],
     )

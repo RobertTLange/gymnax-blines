@@ -115,7 +115,7 @@ class RolloutManager(object):
     def __init__(self, model, env_name, env_kwargs, env_params):
         # Setup functionalities for vectorized batch rollout
         self.env_name = env_name
-        self.env, self.env_params = gymnax.make(env_name, env_kwargs)
+        self.env, self.env_params = gymnax.make(env_name, **env_kwargs)
         self.env_params.replace(**env_params)
         self.observation_space = self.env.observation_space(self.env_params)
         self.action_size = self.env.action_space(self.env_params).shape
@@ -157,7 +157,7 @@ class RolloutManager(object):
             """lax.scan compatible step transition in jax env."""
             obs, state, train_state, rng = state_input
             rng, rng_step, rng_net = jax.random.split(rng, 3)
-            action, _, _ = self.select_action(train_state, obs, rng_net)
+            action, _, _, rng = self.select_action(train_state, obs, rng_net)
             # action = jnp.nan_to_num(action, nan=0.0)
             next_o, next_s, reward, done, _ = self.batch_step(
                 jax.random.split(rng_step, num_envs),

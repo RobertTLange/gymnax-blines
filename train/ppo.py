@@ -8,9 +8,10 @@ from collections import defaultdict
 import flax
 from flax.training.train_state import TrainState
 import numpy as np
+import tqdm
 
 
-def train_ppo(rng, config, log, model, params):
+def train_ppo(rng, config, model, params, mle_log):
     """Training loop for PPO based on https://github.com/bmazoure/ppo_jax."""
     num_total_epochs = int(config.num_train_steps // config.num_train_envs + 1)
     num_steps_warm_up = int(config.num_train_steps * config.lr_warmup)
@@ -31,9 +32,6 @@ def train_ppo(rng, config, log, model, params):
         params=params,
         tx=tx,
     )
-
-    best_reward_yet, best_model_ckpt = -jnp.inf, None
-
     # Setup the rollout manager -> Collects data in vmapped-fashion over envs
     rollout_manager = RolloutManager(
         model, config.env_name, config.env_kwargs, config.env_params
@@ -79,7 +77,9 @@ def train_ppo(rng, config, log, model, params):
     )
 
     total_steps = 0
-    for step in range(num_total_epochs):
+    log_steps, log_return = [], []
+    t = tqdm.tqdm(range(1, num_total_epochs + 1), desc="PPO", leave=True)
+    for step in t:
         train_state, obs, state, batch, rng_step = get_transition(
             train_state,
             obs,
@@ -111,22 +111,23 @@ def train_ppo(rng, config, log, model, params):
                 train_state,
                 config.num_test_rollouts,
             )
-            if rewards > best_reward_yet:
-                best_reward_yet = rewards
-                best_model_ckpt = dict(train_state.params)
+            log_steps.append(total_steps)
+            log_return.append(rewards)
+            t.set_description(f"R: {str(rewards)}")
+            t.refresh()
 
-            log.update(
-                {"num_steps": total_steps},
-                {"return": rewards},
-                model=train_state.params,
-                save=True,
-            )
+            if mle_log is not None:
+                mle_log.update(
+                    {"num_steps": total_steps},
+                    {"return": rewards},
+                    model=train_state.params,
+                    save=True,
+                )
 
     return (
-        best_model_ckpt,
-        best_reward_yet,
+        log_steps,
+        log_return,
         train_state.params,
-        rewards,
     )
 
 

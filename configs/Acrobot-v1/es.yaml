@@ -14,13 +14,14 @@ train_config:
     popsize: 100
     opt_name: "adam"
   es_params:
-    lrate_init: 0.04
-    lrate_decay: 0.999
-    lrate_limit: 0.001
     sigma_init: 0.03
     sigma_decay: 0.999
     sigma_limit: 0.01
-
+  opt_params:
+    lrate_init: 0.04
+    lrate_decay: 0.999
+    lrate_limit: 0.001
+  
   fitness_config:
     maximize: true
     centered_rank: true
@@ -37,7 +38,7 @@ train_config:
 log_config:
   time_to_track: ["num_steps"]
   what_to_track: ["return"]
-  verbose: true
+  verbose: false
   print_every_k_updates: 1
   overwrite: 1
   model_type: "jax"

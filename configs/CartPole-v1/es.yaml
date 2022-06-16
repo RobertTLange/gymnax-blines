@@ -1,9 +1,9 @@
 train_config:
   train_type: "ES"
-  num_generations: 1000
-  evaluate_every_gen: 50
+  num_generations: 100
+  evaluate_every_gen: 5
 
-  env_name: "MountainCar-v0"
+  env_name: "CartPole-v1"
   env_kwargs: {}
   env_params: {}
   num_test_rollouts: 164
@@ -11,14 +11,14 @@ train_config:
 
   es_name: "OpenES"
   es_config:
-    popsize: 256
+    popsize: 100
     opt_name: "adam"
   es_params:
-    sigma_init: 0.1
+    sigma_init: 0.03
     sigma_decay: 0.999
-    sigma_limit: 0.001
+    sigma_limit: 0.01
   opt_params:
-    lrate_init: 0.001
+    lrate_init: 0.04
     lrate_decay: 0.999
     lrate_limit: 0.001
 
@@ -38,7 +38,7 @@ train_config:
 log_config:
   time_to_track: ["num_steps"]
   what_to_track: ["return"]
-  verbose: true
+  verbose: false
   print_every_k_updates: 1
   overwrite: 1
   model_type: "jax"

@@ -30,7 +30,7 @@ train_config:
 log_config:
   time_to_track: ["num_steps"]
   what_to_track: ["return"]
-  verbose: true
+  verbose: false
   print_every_k_updates: 1
   overwrite: 1
   model_type: "jax"

@@ -18,21 +18,42 @@ if __name__ == "__main__":
     import jax
     import gymnax
 
-    load_model = True
-    env_name = "PointRobot-misc"  # "MetaMaze-misc"  # "Breakout-MinAtar"
-    if load_model:
+    RANDOM = False
+    JAX = False
+    TORCH = True
+    env_name = "Breakout-MinAtar"  # "PointRobot-misc"  # "MetaMaze-misc"
+    if JAX:
         experiment_dir = "experiments/open_es"
         configs = load_job_config(
             os.path.join(experiment_dir, "open_es.yaml"), experiment_dir
         )
         model, params = load_neural_network(configs[0], experiment_dir)
 
+        if configs[0].network_name == "LSTM":
+            hidden = model.initialize_carry()
+    elif TORCH:
+        import gym
+        import torch
+        from evaluate.dqn_torch import QNetwork
+
+        data_and_weights = torch.load(
+            "evaluate/minatar_torch_ckpt/breakout_data_and_weights",
+            map_location=lambda storage, loc: storage,
+        )
+
+        returns = data_and_weights["returns"]
+        network_params = data_and_weights["policy_net_state_dict"]
+
+        env = gym.make("MinAtar/Breakout-v0")
+        in_channels = env.game.n_channels
+        num_actions = env.game.num_actions()
+
+        network = QNetwork(in_channels, num_actions)
+        network.load_state_dict(network_params)
+
     state_seq = []
     rng = jax.random.PRNGKey(0)
     env, env_params = gymnax.make(env_name)
-
-    if configs[0].network_name == "LSTM":
-        hidden = model.initialize_carry()
 
     rng, rng_reset = jax.random.split(rng)
     obs, env_state = env.reset(rng_reset, env_params)
@@ -40,13 +61,16 @@ if __name__ == "__main__":
     while True:
         state_seq.append(env_state)
         rng, rng_act, rng_step = jax.random.split(rng, 3)
-        if load_model:
+        if RANDOM:
+            action = env.action_space(env_params).sample(rng_act)
+        elif TORCH:
+            action = int(network(obs).max(1)[1].view(1, 1).squeeze())
+        elif JAX:
             if configs[0].network_name == "LSTM":
                 hidden, action = model.apply(params, obs, hidden, rng_act)
             else:
                 action = model.apply(params, obs, rng_act)
-        else:
-            action = env.action_space(env_params).sample(rng_act)
+
         next_obs, next_env_state, reward, done, info = env.step(
             rng_step, env_state, action, env_params
         )

@@ -1,5 +1,8 @@
 gymnax
 evosax
 optax
-mle-toolbox
+dotmap
 tqdm
+numpy
+matplotlib
+yaml

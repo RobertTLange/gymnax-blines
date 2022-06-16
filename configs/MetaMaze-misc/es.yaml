@@ -1,13 +1,13 @@
 train_config:
   train_type: "ES"
-  num_generations: 10000
+  num_generations: 5000
   evaluate_every_gen: 100
 
-  env_name: "PointRobot-misc"
+  env_name: "MetaMaze-misc"
   env_kwargs: {}
   env_params: {}
   num_test_rollouts: 164
-  num_train_rollouts: 20
+  num_train_rollouts: 64
 
   es_name: "OpenES"
   es_config:
@@ -30,13 +30,13 @@ train_config:
 
   network_name: "LSTM"
   network_config: 
-    num_hidden_units: 32
-    output_activation: "identity"
+    num_hidden_units: 48
+    output_activation: "categorical"
 
 log_config:
   time_to_track: ["num_steps"]
   what_to_track: ["return"]
-  verbose: true
+  verbose: false
   print_every_k_updates: 1
   overwrite: 1
   model_type: "jax"
