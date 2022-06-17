@@ -1,5 +1,5 @@
 import jax
-from train.models import get_model_ready
+from utils.models import get_model_ready
 
 
 def load_config():
@@ -76,9 +76,9 @@ def main(config, mle_log):
 
     # Run the training loop (either evosax ES or PPO)
     if config.train_type == "ES":
-        from train.es import train_es as train_fn
+        from utils.es import train_es as train_fn
     elif config.train_type == "PPO":
-        from train.ppo import train_ppo as train_fn
+        from utils.ppo import train_ppo as train_fn
     else:
         raise ValueError("Unknown train_type ('ES', 'PPO').")
 

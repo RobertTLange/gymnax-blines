@@ -2,7 +2,7 @@ from functools import partial
 import optax
 import jax
 import jax.numpy as jnp
-from train.ppo_utils import BatchManager, RolloutManager
+from utils.ppo_utils import BatchManager, RolloutManager
 from typing import Any, Callable, Tuple
 from collections import defaultdict
 import flax

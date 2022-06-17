@@ -1,7 +1,7 @@
 train_config:
   train_type: "PPO"
-  num_train_steps: 500000
-  evaluate_every_epochs: 1000
+  num_train_steps: 100000
+  evaluate_every_epochs: 500
 
   env_name: "Catch-bsuite"
   env_kwargs: {}
@@ -26,6 +26,7 @@ train_config:
   network_config:
     num_hidden_units: 64
     num_hidden_layers: 2
+    flatten_2d: True
 
 log_config:
   time_to_track: ["num_steps"]

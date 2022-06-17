@@ -26,7 +26,8 @@ class BatchManager:
         self.gae_lambda = gae_lambda
 
         try:
-            self.state_shape = [state_space.shape[0]]
+            temp = state_space.shape[0]
+            self.state_shape = state_space.shape
         except Exception:
             self.state_shape = [state_space]
         self.reset()
@@ -155,34 +156,43 @@ class RolloutManager(object):
 
         def policy_step(state_input, _):
             """lax.scan compatible step transition in jax env."""
-            obs, state, train_state, rng = state_input
+            obs, state, train_state, rng, cum_reward, valid_mask = state_input
             rng, rng_step, rng_net = jax.random.split(rng, 3)
             action, _, _, rng = self.select_action(train_state, obs, rng_net)
-            # action = jnp.nan_to_num(action, nan=0.0)
             next_o, next_s, reward, done, _ = self.batch_step(
                 jax.random.split(rng_step, num_envs),
                 state,
                 action,
             )
-            carry, y = [next_o, next_s, train_state, rng], [reward, done]
+            new_cum_reward = cum_reward + reward * valid_mask
+            new_valid_mask = valid_mask * (1 - done)
+            carry, y = [
+                next_o,
+                next_s,
+                train_state,
+                rng,
+                new_cum_reward,
+                new_valid_mask,
+            ], [new_valid_mask]
             return carry, y
 
         # Scan over episode step loop
-        _, scan_out = jax.lax.scan(
+        carry_out, scan_out = jax.lax.scan(
             policy_step,
-            [obs, state, train_state, rng_episode],
-            [jnp.zeros((self.env_params.max_steps_in_episode, num_envs, 2))],
+            [
+                obs,
+                state,
+                train_state,
+                rng_episode,
+                jnp.array(num_envs * [0.0]),
+                jnp.array(num_envs * [1.0]),
+            ],
+            (),
+            self.env_params.max_steps_in_episode,
         )
-        # Return the sum of rewards accumulated by agent in episode rollout
-        rewards, dones = scan_out[0], scan_out[1]
-        rewards = rewards.reshape(
-            self.env_params.max_steps_in_episode, num_envs, 1
-        )
-        dones = dones.reshape(self.env_params.max_steps_in_episode, num_envs, 1)
-        ep_mask = (jnp.cumsum(dones, axis=0) < 1).reshape(
-            self.env_params.max_steps_in_episode, num_envs, 1
-        )
-        return jnp.mean(jnp.sum(rewards * ep_mask, axis=0))
+
+        cum_return = carry_out[-2].squeeze()
+        return jnp.mean(cum_return)
 
 
 @partial(jax.jit, static_argnums=0)

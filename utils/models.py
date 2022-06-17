@@ -51,10 +51,25 @@ class CategoricalSeparateMLP(nn.Module):
     prefix_actor: str = "actor"
     prefix_critic: str = "critic"
     model_name: str = "separate-mlp"
+    flatten_2d: bool = False  # Catch case
+    flatten_3d: bool = False  # Rooms/minatar case
 
     @nn.compact
     def __call__(self, x, rng):
-        x = x.reshape(-1)
+        # Flatten a single 2D image
+        if self.flatten_2d and len(x.shape) == 2:
+            x = x.reshape(-1)
+        # Flatten a batch of 2d images into a batch of flat vectors
+        if self.flatten_2d and len(x.shape) > 2:
+            x = x.reshape(x.shape[0], -1)
+
+        # Flatten a single 3D image
+        if self.flatten_3d and len(x.shape) == 3:
+            x = x.reshape(-1)
+        # Flatten a batch of 3d images into a batch of flat vectors
+        if self.flatten_3d and len(x.shape) > 3:
+            x = x.reshape(x.shape[0], -1)
+
         x_v = nn.relu(
             nn.Dense(
                 self.num_hidden_units,
