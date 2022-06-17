@@ -54,6 +54,7 @@ class CategoricalSeparateMLP(nn.Module):
 
     @nn.compact
     def __call__(self, x, rng):
+        x = x.reshape(-1)
         x_v = nn.relu(
             nn.Dense(
                 self.num_hidden_units,

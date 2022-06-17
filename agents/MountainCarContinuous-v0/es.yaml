@@ -1,9 +1,9 @@
 train_config:
   train_type: "ES"
-  num_generations: 1000
+  num_generations: 500
   evaluate_every_gen: 50
 
-  env_name: "MountainCar-v0"
+  env_name: "MountainCarContinuous-v0"
   env_kwargs: {}
   env_params: {}
   num_test_rollouts: 164
@@ -15,19 +15,19 @@ train_config:
     elite_ratio: 0.5
   es_params:
     sigma_init: 0.1
-
+    
   fitness_config:
     maximize: true
     centered_rank: false
     z_score: false
     w_decay: 0.0
-
+  
   network_name: "MLP"
   network_config: 
     num_hidden_units: 64
     num_hidden_layers: 2
     hidden_activation: "relu"
-    output_activation: "categorical"
+    output_activation: "gaussian"
 
 log_config:
   time_to_track: ["num_steps"]

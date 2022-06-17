@@ -1,4 +1,7 @@
-# A Set of Training and Speed Evaluation Tools for `gymnax`
+# Training and Speed Evaluation Tools for `gymnax`
+
+<a href="https://github.com/RobertTLange/gymnax-blines/blob/main/docs/logo.png?raw=true"><img src="https://github.com/RobertTLange/gymnax-blines/blob/main/docs/logo.png?raw=true" width="170" align="right" /></a>
+
 
 In this repository we provide training pipelines for `gymnax` agents in JAX. Furthermore, you can use the utilities to speed benchmark step transitions.
 
