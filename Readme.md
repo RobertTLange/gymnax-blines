@@ -7,7 +7,7 @@ In this repository we provide training pipelines for [`gymnax`](https://github.c
 
 ## Accelerated Training of Agents with [`gymnax`](https://github.com/RobertTLange/gymnax)
 
-We provide training routines and the corresponding checkpoints for both Evolution Strategies (mostly OpenES using [`gymnax`](https://github.com/RobertTLange/evosax)) and PPO. You can train the agents as follows: 
+We provide training routines and the corresponding checkpoints for both Evolution Strategies (mostly OpenES using [`evosax`](https://github.com/RobertTLange/evosax) and PPO. You can train the agents as follows: 
 
 ```
 python train.py -config configs/<env_name>/ppo.yaml
@@ -36,6 +36,38 @@ Finally, we provide simple tools for benchmarking the speed of step transitions 
 ```
 python speed.py -env <env_name>
 ```
+
+For each environment we estimate the milliseconds required to execute 1 Mio steps on various hardware and for both random/neural network policies. We report the mean over 10 independent runs:
+
+| Environment Name | `np` - CPU 1 Env | `jax` - CPU 1 Env | `np` - CPU 20 Envs | `jax` - CPU 20 Envs | `jax` - RTX 2080Ti 5k Envs | `jax` - V100s 10k Envs |
+| --- | --- | --- | --- | --- | --- | --- |
+| [`Pendulum-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/pendulum.py) | 
+| [`CartPole-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/cartpole.py) | 
+| [`MountainCar-v0`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/mountain_car.py) |
+| [`MountainCarContinuous-v0`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/continuous_mountain_car.py) | [Brockman et al. (2016)](https://arxiv.org/abs/1606.01540)  |
+| [`Acrobot-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/acrobot.py) |
+| --- | --- | --- | --- | ---
+| [`Catch-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/catch.py) |
+| [`DeepSea-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/deep_sea.py) |
+| [`MemoryChain-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/memory_chain.py) |
+| [`UmbrellaChain-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/umbrella_chain.py) |
+| [`DiscountingChain-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/discounting_chain.py) |
+| [`MNISTBandit-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/mnist.py) |
+| [`SimpleBandit-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/bandit.py) |
+| --- | --- | --- | --- | ---
+| [`Asterix-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/asterix.py) |
+| [`Breakout-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/breakout.py) |
+| [`Freeway-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/freeway.py) |
+| [`Seaquest-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/seaquest.py) |
+| [`SpaceInvaders-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/space_invaders.py) |
+| --- | --- | --- | --- | ---
+| [`FourRooms-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/rooms.py) |
+| [`MetaMaze-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/meta_maze.py) |
+| [`PointRobot-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/point_robot.py) |
+| [`BernoulliBandit-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/bernoulli_bandit.py) |
+| [`GaussianBandit-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/gaussian_bandit.py) |
+
+TPU comparisons will follow once I (or you?) find the time.
 
 ## Running Grid Search with the `MLE-Infrastructure`
 

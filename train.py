@@ -16,7 +16,7 @@ def main(config, mle_log):
     elif config.train_type == "PPO":
         from utils.ppo import train_ppo as train_fn
     else:
-        raise ValueError("Unknown train_type ('ES', 'PPO').")
+        raise ValueError("Unknown train_type. Has to be in ('ES', 'PPO').")
 
     # Log and store the results.
     log_steps, log_return, network_ckpt = train_fn(
