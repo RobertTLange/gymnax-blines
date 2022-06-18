@@ -1,4 +1,3 @@
-import time
 import jax
 import numpy as np
 from utils.models import get_model_ready
