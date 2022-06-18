@@ -27,6 +27,7 @@ Note that we do not support visualizations for most behavior suite environments,
 |  |  |  |  | 
 | --- | --- | --- | --- |
 | ![](docs/Pendulum-v1.gif) | ![](docs/Acrobot-v1.gif)  | ![](docs/CartPole-v1.gif) | ![](docs/MountainCarContinuous-v0.gif) |
+| ![](docs/Catch-bsuite.gif) | ![](docs/FourRooms-misc.gif)  | ![](docs/MetaMaze-misc.gif) | ![](docs/PointRobot-misc.gif) |
 
 ## Speed Up Evaluations for [`gymnax`](https://github.com/RobertTLange/gymnax)
 
@@ -34,6 +35,13 @@ Finally, we provide simple tools for benchmarking the speed of step transitions 
 
 ```
 python speed.py -env <env_name>
+```
+
+## Running Grid Search with the `MLE-Infrastructure`
+
+```
+pip install mle-toolbox
+mle run ...
 ```
 
 ## MinAtar Comparison with Torch DQN

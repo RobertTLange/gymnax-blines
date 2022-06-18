@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import jax
 import gymnax
@@ -31,12 +30,15 @@ def rollout_episode(env, env_params, model, model_params):
     while True:
         state_seq.append(env_state)
         rng, rng_act, rng_step = jax.random.split(rng, 3)
-        # action = int(network(obs).max(1)[1].view(1, 1).squeeze())
         if model is not None:
             if model.model_name == "LSTM":
                 hidden, action = model.apply(model_params, obs, hidden, rng_act)
             else:
-                action = model.apply(model_params, obs, rng_act)
+                if model.model_name.startswith("separate"):
+                    v, pi = model.apply(model_params, obs, rng_act)
+                    action = pi.sample(seed=rng_act)
+                else:
+                    action = model.apply(model_params, obs, rng_act)
         else:
             action = env.action_space(env_params).sample(rng_act)
         next_obs, next_env_state, reward, done, info = env.step(
@@ -82,40 +84,41 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_known_args()
 
+    base = f"agents/{args.env_name}/{args.train_type}"
+    configs = load_config(base + ".yaml")
     if not args.random:
-        base = f"agents/{args.env_name}/{args.train_type}"
-        configs = load_config(base + ".yaml")
         model, model_params = load_neural_network(
             configs.train_config, base + ".pkl"
         )
-
-        # import gym
-        # import torch
-        # from evaluate.dqn_torch import QNetwork
-
-        # data_and_weights = torch.load(
-        #     "evaluate/minatar_torch_ckpt/breakout_data_and_weights",
-        #     map_location=lambda storage, loc: storage,
-        # )
-
-        # returns = data_and_weights["returns"]
-        # network_params = data_and_weights["policy_net_state_dict"]
-
-        # env = gym.make("MinAtar/Breakout-v0")
-        # in_channels = env.game.n_channels
-        # num_actions = env.game.num_actions()
-
-        # network = QNetwork(in_channels, num_actions)
-        # network.load_state_dict(network_params)
     else:
         model, model_params = None, None
     env, env_params = gymnax.make(
         configs.train_config.env_name,
         **configs.train_config.env_kwargs,
     )
-    env_params.replace(configs.train_config.env_params)
+    env_params.replace(**configs.train_config.env_params)
     state_seq, cum_rewards = rollout_episode(
         env, env_params, model, model_params
     )
     vis = Visualizer(env, env_params, state_seq, cum_rewards)
     vis.animate(f"docs/{args.env_name}.gif")
+
+    # action = int(network(obs).max(1)[1].view(1, 1).squeeze())
+    # import gym
+    # import torch
+    # from evaluate.dqn_torch import QNetwork
+
+    # data_and_weights = torch.load(
+    #     "evaluate/minatar_torch_ckpt/breakout_data_and_weights",
+    #     map_location=lambda storage, loc: storage,
+    # )
+
+    # returns = data_and_weights["returns"]
+    # network_params = data_and_weights["policy_net_state_dict"]
+
+    # env = gym.make("MinAtar/Breakout-v0")
+    # in_channels = env.game.n_channels
+    # num_actions = env.game.num_actions()
+
+    # network = QNetwork(in_channels, num_actions)
+    # network.load_state_dict(network_params)

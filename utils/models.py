@@ -9,7 +9,7 @@ import gymnax
 def get_model_ready(rng, config):
     """Instantiate a model according to obs shape of environment."""
     # Get number of desired output units
-    env, env_params = gymnax.make(config.env_name)
+    env, env_params = gymnax.make(config.env_name, **config.env_kwargs)
 
     # Instantiate model class (flax-based)
     if config.train_type == "ES":
@@ -28,7 +28,6 @@ def get_model_ready(rng, config):
 
     # Initialize the network based on the observation shape
     obs_shape = env.observation_space(env_params).shape
-
     if config.network_name != "LSTM":
         params = model.init(rng, jnp.zeros(obs_shape), rng=rng)
     else:
@@ -69,7 +68,6 @@ class CategoricalSeparateMLP(nn.Module):
         # Flatten a batch of 3d images into a batch of flat vectors
         if self.flatten_3d and len(x.shape) > 3:
             x = x.reshape(x.shape[0], -1)
-
         x_v = nn.relu(
             nn.Dense(
                 self.num_hidden_units,

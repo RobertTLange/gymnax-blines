@@ -1,22 +1,26 @@
 train_config:
   train_type: "ES"
-  num_generations: 5000
+  num_generations: 1500
   evaluate_every_gen: 100
 
-  env_name: "MetaMaze-misc"
-  env_kwargs:
-    maze_size: 7
-    rf_size: 5
+  env_name: "GaussianBandit-misc"
+  env_kwargs: {}
   env_params: {}
   num_test_rollouts: 164
-  num_train_rollouts: 64
+  num_train_rollouts: 20
 
-  es_name: "SimpleGA"
+  es_name: "OpenES"
   es_config:
     popsize: 256
-    elite_ratio: 0.5
+    opt_name: "adam"
   es_params:
-    sigma_init: 0.1
+    sigma_init: 0.2
+    sigma_decay: 0.999
+    sigma_limit: 0.005
+  opt_params:
+    lrate_init: 0.01
+    lrate_decay: 0.999
+    lrate_limit: 0.001
 
   fitness_config:
     maximize: true
@@ -26,7 +30,7 @@ train_config:
 
   network_name: "LSTM"
   network_config: 
-    num_hidden_units: 48
+    num_hidden_units: 16
     output_activation: "categorical"
 
 log_config:
