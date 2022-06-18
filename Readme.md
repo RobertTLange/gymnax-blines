@@ -39,7 +39,7 @@ python speed.py -env <env_name>
 
 For each environment we estimate the milliseconds required to execute 1 Mio steps on various hardware and for both random/neural network policies. We report the mean over 10 independent runs:
 
-| Environment Name | `np` <br /> CPU <br /> 1 Env | `jax` <br /> CPU <br /> 1 Env | `np` <br /> CPU <br /> 20 Envs | `jax` <br /> CPU <br /> 20 Envs | `jax` <br /> RTX 2080Ti <br /> 5k Envs | `jax` <br /> V100s <br /> 10k Envs |
+| Environment Name | `np` <br /> CPU <br /> 1 Env | `jax` <br /> CPU <br /> 1 Env | `np` <br /> CPU <br /> 20 Envs | `jax` <br /> CPU <br /> 20 Envs | `jax` <br /> 2080Ti <br /> 5k Envs | `jax` <br /> V100s <br /> 10k Envs |
 | --- | --- | --- | --- | --- | --- | --- |
 | [`Pendulum-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/pendulum.py) | 
 | [`CartPole-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/cartpole.py) | 
