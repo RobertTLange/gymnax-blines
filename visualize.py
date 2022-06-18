@@ -1,9 +1,10 @@
 import os
+import numpy as np
 import jax
 import gymnax
+from gymnax.visualize import Visualizer
 from utils.models import get_model_ready
 from utils.helpers import load_pkl_object, load_config
-from gymnax.visualize import Visualizer
 
 
 def load_neural_network(config, agent_path):
@@ -26,6 +27,7 @@ def rollout_episode(env, env_params, model, model_params):
             hidden = model.initialize_carry()
 
     t_counter = 0
+    reward_seq = []
     while True:
         state_seq.append(env_state)
         rng, rng_act, rng_step = jax.random.split(rng, 3)
@@ -40,15 +42,17 @@ def rollout_episode(env, env_params, model, model_params):
         next_obs, next_env_state, reward, done, info = env.step(
             rng_step, env_state, action, env_params
         )
-        print(t_counter, reward, action, done)
-        print(10 * "=")
+        reward_seq.append(reward)
+        # print(t_counter, reward, action, done)
+        # print(10 * "=")
         t_counter += 1
         if done:
             break
         else:
             env_state = next_env_state
             obs = next_obs
-    return state_seq
+    print(f"{env.name} - Steps: {t_counter}, Return: {np.sum(reward_seq)}")
+    return state_seq, np.cumsum(reward_seq)
 
 
 if __name__ == "__main__":
@@ -78,7 +82,6 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_known_args()
 
-    # "Breakout-MinAtar"  # "PointRobot-misc"  # "MetaMaze-misc"
     if not args.random:
         base = f"agents/{args.env_name}/{args.train_type}"
         configs = load_config(base + ".yaml")
@@ -106,7 +109,13 @@ if __name__ == "__main__":
         # network.load_state_dict(network_params)
     else:
         model, model_params = None, None
-    env, env_params = gymnax.make(args.env_name)
-    state_seq = rollout_episode(env, env_params, model, model_params)
-    vis = Visualizer(env, env_params, state_seq)
-    vis.animate(f"docs/test_{args.env_name}.gif")
+    env, env_params = gymnax.make(
+        configs.train_config.env_name,
+        **configs.train_config.env_kwargs,
+    )
+    env_params.replace(configs.train_config.env_params)
+    state_seq, cum_rewards = rollout_episode(
+        env, env_params, model, model_params
+    )
+    vis = Visualizer(env, env_params, state_seq, cum_rewards)
+    vis.animate(f"docs/{args.env_name}.gif")
