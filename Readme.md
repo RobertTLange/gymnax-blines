@@ -39,7 +39,7 @@ python speed.py -env <env_name> --use_gpu --use_network --num_envs 10
 
 For each environment we estimate the seconds required to execute 1 Mio steps on various hardware and for both random (R)/neural network (N) policies. We report the mean over 10 independent runs:
 
-| Environment Name | `np` <br /> CPU <br /> 10 Envs | `jax` <br /> CPU <br /> 10 Envs | `np` <br /> CPU <br /> 40 Envs | `jax` <br /> CPU <br /> 40 Envs | `jax` <br /> 2080Ti <br /> 2k Envs | `jax` <br /> V100s <br /> 10k Envs | `jax` <br /> TPU v3-8 <br /> 20k Envs |
+| Environment Name | `np` <br /> CPU <br /> 10 Envs | `jax` <br /> CPU <br /> 10 Envs | `np` <br /> CPU <br /> 40 Envs | `jax` <br /> CPU <br /> 40 Envs | `jax` <br /> 2080Ti <br /> 2k Envs | `jax` <br /> V100s <br /> 10k Envs | `jax` <br /> v3-8 <br /> 20k Envs |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [`Acrobot-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/acrobot.py) | R: 72 <br /> N: 118 | R: 1.16 <br /> N: 2.90 | R: 66 <br /> N: 77.2 | R: 1.03 <br /> N: 2.3 | R: 0.06 <br /> N: 0.08
 | [`Pendulum-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/pendulum.py) | R: 139 <br /> N: 118 | R: 0.41 <br /> N: 1.41 | R: 118 <br /> N: 70 | R: 0.32 <br /> N: 1.07 | R: 0.07 <br /> N: 0.09

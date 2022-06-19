@@ -51,7 +51,7 @@ log_config:
   model_type: "jax"
   use_wandb: true
   wandb_config:
-    name: breakout-open-es-cnn-z
+    name: breakout-open-es-cnn
 
 device_config:
   num_devices: 1

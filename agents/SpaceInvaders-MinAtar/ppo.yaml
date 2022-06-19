@@ -1,0 +1,41 @@
+train_config:
+  train_type: "PPO"
+  num_train_steps: 10000000
+  evaluate_every_epochs: 5000
+
+  env_name: "SpaceInvaders-MinAtar"
+  env_kwargs: {}
+  env_params: {}
+  num_test_rollouts: 164
+  
+  num_train_envs: 64  # Number of parallel env workers
+  max_grad_norm: 0.5  # Global norm to clip gradients by
+  gamma: 0.999  # Discount factor
+  n_steps: 128 # "GAE n-steps"
+  n_minibatch: 8 # "Number of PPO minibatches"
+  lr_begin: 5e-04  # Start PPO learning rate
+  lr_end: 5e-04 #  End PPO learning rate
+  lr_warmup: 0.05 # Prop epochs until warmup is completed 
+  epoch_ppo: 4  # "Number of PPO epochs on a single batch"
+  clip_eps: 0.2 # "Clipping range"
+  gae_lambda: 0.95 # "GAE lambda"
+  entropy_coeff: 0.01 # "Entropy loss coefficient"
+  critic_coeff: 0.5  # "Value loss coefficient"
+
+  network_name: "Categorical-MLP"
+  network_config:
+    num_hidden_units: 256
+    num_hidden_layers: 2
+    flatten_3d: True
+
+log_config:
+  time_to_track: ["num_steps"]
+  what_to_track: ["return"]
+  verbose: false
+  print_every_k_updates: 1
+  overwrite: 1
+  model_type: "jax"
+
+device_config:
+  num_devices: 1
+  device_type: "gpu"
