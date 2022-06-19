@@ -51,4 +51,5 @@ def load_pkl_object(filename: str):
 
     with open(filename, "rb") as input:
         obj = pickle.load(input)
+    print(f"Loaded data from {filename}.")
     return obj

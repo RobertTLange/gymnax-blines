@@ -1,15 +1,3 @@
-import jax
-import numpy as np
-from utils.models import get_model_ready
-from utils.helpers import load_config
-from utils.benchmark import (
-    speed_numpy_random,
-    speed_numpy_network,
-    speed_gymnax_random,
-    speed_gymnax_network,
-)
-
-
 def speed(
     env_name: str,
     num_env_steps: int,
@@ -18,6 +6,17 @@ def speed(
     use_network: bool,
     use_np_env: bool,
 ):
+    import jax
+    import numpy as np
+    from utils.models import get_model_ready
+    from utils.helpers import load_config
+    from utils.benchmark import (
+        speed_numpy_random,
+        speed_numpy_network,
+        speed_gymnax_random,
+        speed_gymnax_network,
+    )
+
     # Get the policy and parameters (if not random)
     configs = load_config(f"agents/{env_name}/es.yaml")
     rng = jax.random.PRNGKey(0)
@@ -105,7 +104,29 @@ if __name__ == "__main__":
         help="Numpy rollout.",
     )
 
+    parser.add_argument(
+        "-gpu",
+        "--use_gpu",
+        action="store_true",
+        default=False,
+        help="Use gpu if available.",
+    )
+
     args, _ = parser.parse_known_args()
+
+    import os
+
+    if args.use_gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    else:
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+    print(30 * "=", "START SPEED BENCH", 30 * "=")
+    print(
+        f"Env: {args.env_name}, #Envs: {args.num_envs}, Network:"
+        f" {args.use_network}, np env: {args.use_np_env}, GPU: {args.use_gpu}"
+    )
+    print(79 * "=")
     mean_rt, std_rt = speed(
         args.env_name,
         args.num_env_steps,
@@ -114,3 +135,17 @@ if __name__ == "__main__":
         args.use_network,
         args.use_np_env,
     )
+
+    conf_name = f"net-{args.use_network}-envs-{args.num_envs}-np-{args.use_np_env}-gpu-{args.use_gpu}"
+    print(conf_name)
+    # Write data to pkl file
+    fname = f"agents/{args.env_name}/speed.pkl"
+    from utils.helpers import load_pkl_object, save_pkl_object
+
+    if os.path.exists(fname):
+        log = load_pkl_object(fname)
+    else:
+        log = {}
+
+    log[conf_name] = [mean_rt, std_rt]
+    save_pkl_object(log, fname)

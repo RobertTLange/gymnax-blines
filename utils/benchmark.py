@@ -75,11 +75,12 @@ def speed_numpy_random(env_name, num_env_steps, num_envs):
     """Random episode rollout in numpy."""
     envs = make_parallel_env(env_name, seed=0, n_rollout_threads=num_envs)
     envs.reset()
-    start_t = time.time()
     num_batch_steps = int(np.ceil(num_env_steps / num_envs))
+    start_t = time.time()
     for i in range(num_batch_steps):
         action = [envs.action_space.sample() for e in range(num_envs)]
         obs, reward, done, _ = envs.step(action)
+        # NOTE: Automatic reset taken care of by wrapper!
     return time.time() - start_t
 
 
@@ -89,7 +90,6 @@ def speed_numpy_network(
     """MLP episode rollout in numpy."""
     envs = make_parallel_env(env_name, seed=0, n_rollout_threads=num_envs)
     obs = envs.reset()
-    start_t = time.time()
     num_batch_steps = int(np.ceil(num_env_steps / num_envs))
 
     if num_envs == 1:
@@ -97,6 +97,17 @@ def speed_numpy_network(
     else:
         apply_fn = jax.jit(jax.vmap(model.apply, in_axes=(None, 0, 0)))
 
+    # Run once to compile apply function!
+    rng, rng_batch = jax.random.split(rng)
+    rng_batch_eval = jax.random.split(rng_batch, num_envs).squeeze()
+    if env_name in ["Pendulum-v1", "MountainCarContinuous-v0"]:
+        action = apply_fn(model_params, obs, rng_batch_eval).reshape(
+            num_envs, 1
+        )
+    else:
+        action = apply_fn(model_params, obs, rng_batch_eval).reshape(num_envs)
+
+    start_t = time.time()
     for i in range(num_batch_steps):
         rng, rng_batch = jax.random.split(rng)
         rng_batch_eval = jax.random.split(rng_batch, num_envs).squeeze()
@@ -110,4 +121,5 @@ def speed_numpy_network(
                 num_envs
             )
         obs, reward, done, _ = envs.step(action.tolist())
+        # NOTE: Automatic reset taken care of by wrapper!
     return time.time() - start_t
