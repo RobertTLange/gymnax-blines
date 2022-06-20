@@ -21,7 +21,7 @@ python train.py -config agents/<env_name>/es.yaml
 This will store checkpoints and training logs as `pkl` in `agents/<env_name>/ppo.pkl`. Collect all training runs sequentially via:
 
 ```
-bash exec_train.sh
+bash exec.sh train
 ```
 
 ![](docs/lcurves.png)
@@ -37,7 +37,7 @@ python visualize.py -env <env_name> -train <{es/ppo}>
 Collect all visualizations sequentially via:
 
 ```
-bash exec_visualize.sh
+bash exec.sh visualize
 ```
 
 Note that we do not support visualizations for most behavior suite environments, since they do not lend themselves to visual display (e.g. markov reward process, etc.).
@@ -59,7 +59,7 @@ python speed.py -env <env_name> --use_gpu --use_network --num_envs 10
 Collect all speed estimates sequentially via:
 
 ```
-bash exec_speed.sh
+bash exec.sh speed
 ```
 
 For each environment we estimate the seconds required to execute 1 Mio steps on various hardware and for both random (R)/neural network (N) policies. We report the mean over 10 independent runs:

@@ -1,24 +1,8 @@
-import gym
 import numpy as np
 from multiprocessing import Process, Pipe
 from utils.vec_env.vectorize import VecEnv, CloudpickleWrapper
 
 # Imported from https://github.com/openai/baselines/tree/master/baselines/common/vec_envs
-
-
-def make_parallel_env(env_id, seed, n_rollout_threads):
-    def get_env_fn(rank):
-        def init_env():
-            env = gym.make(env_id)
-            np.random.seed(seed + rank * 1000)
-            return env
-
-        return init_env
-
-    if n_rollout_threads == 1:
-        return DummyVecEnv([get_env_fn(0)])
-    else:
-        return SubprocVecEnv([get_env_fn(i) for i in range(n_rollout_threads)])
 
 
 def worker(remote, parent_remote, env_fn_wrapper):
@@ -74,11 +58,6 @@ class SubprocVecEnv(VecEnv):
             remote.send(("step", action))
         self.waiting = True
 
-    def set_env_params(self, env_params=None, reward_params=None):
-        params = {"env_params": env_params, "reward_params": reward_params}
-        for remote in self.remotes:
-            remote.send(("set_env_params", params))
-
     def step_wait(self):
         results = [remote.recv() for remote in self.remotes]
         self.waiting = False
@@ -131,10 +110,6 @@ class DummyVecEnv(VecEnv):
     def reset(self):
         results = [env.reset() for env in self.envs]
         return np.array(results)
-
-    def set_env_params(self, env_params=None, reward_params=None):
-        for env in self.envs:
-            env.set_env_params(env_params, reward_params)
 
     def close(self):
         return

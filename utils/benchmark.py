@@ -2,13 +2,13 @@ import jax
 import time
 import numpy as np
 from gymnax.experimental import RolloutWrapper
-from utils.vec_env.parallel import make_parallel_env
+from utils.vec_env.wrapper import make_parallel_env
 
 
-def speed_gymnax_random(env_name, num_env_steps, num_envs, rng):
+def speed_gymnax_random(env_name, num_env_steps, num_envs, rng, env_kwargs):
     """Random episode rollout in gymnax."""
     # Define rollout manager for env
-    manager = RolloutWrapper(None, env_name=env_name)
+    manager = RolloutWrapper(None, env_name=env_name, env_kwargs=env_kwargs)
 
     # Multiple rollouts for same network (different rng, e.g. eval)
     rng, rng_batch = jax.random.split(rng)
@@ -38,11 +38,13 @@ def speed_gymnax_random(env_name, num_env_steps, num_envs, rng):
 
 
 def speed_gymnax_network(
-    env_name, num_env_steps, num_envs, rng, model, model_params
+    env_name, num_env_steps, num_envs, rng, model, model_params, env_kwargs
 ):
     """MLP episode rollout in gymnax."""
     # Define rollout manager for env
-    manager = RolloutWrapper(model.apply, env_name=env_name)
+    manager = RolloutWrapper(
+        model.apply, env_name=env_name, env_kwargs=env_kwargs
+    )
 
     # Multiple rollouts for same network (different rng, e.g. eval)
     rng, rng_batch = jax.random.split(rng)

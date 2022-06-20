@@ -22,7 +22,7 @@ def speed(
     rng = jax.random.PRNGKey(0)
 
     if use_network:
-        model, params = get_model_ready(rng, configs.train_config)
+        model, params = get_model_ready(rng, configs.train_config, speed=True)
 
     run_times = []
     for run_id in range(num_runs):
@@ -41,13 +41,23 @@ def speed(
         # Use gymnax env + random policy
         elif not use_network and not use_np_env:
             r_time = speed_gymnax_random(
-                env_name, num_env_steps, num_envs, rng_run
+                env_name,
+                num_env_steps,
+                num_envs,
+                rng_run,
+                configs.train_config.env_kwargs,
             )
 
         # Use gymnax env + MLP policy
         elif use_network and not use_np_env:
             r_time = speed_gymnax_network(
-                env_name, num_env_steps, num_envs, rng_run, model, params
+                env_name,
+                num_env_steps,
+                num_envs,
+                rng_run,
+                model,
+                params,
+                configs.train_config.env_kwargs,
             )
 
         # Store the computed run time
