@@ -11,7 +11,7 @@ train_config:
 
   es_name: "SimpleGA"
   es_config:
-    popsize: 512
+    popsize: 256
     elite_ratio: 0.5
     # opt_name: "adam"
   es_params:

@@ -14,7 +14,7 @@ def load_neural_network(config, agent_path):
     return model, params
 
 
-def rollout_episode(env, env_params, model, model_params):
+def rollout_episode(env, env_params, model, model_params, max_frames=200):
     state_seq = []
     rng = jax.random.PRNGKey(0)
 
@@ -48,7 +48,7 @@ def rollout_episode(env, env_params, model, model_params):
         # print(t_counter, reward, action, done)
         # print(10 * "=")
         t_counter += 1
-        if done:
+        if done or t_counter == max_frames:
             break
         else:
             env_state = next_env_state

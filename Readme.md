@@ -28,6 +28,7 @@ Note that we do not support visualizations for most behavior suite environments,
 | --- | --- | --- | --- |
 | ![](docs/Pendulum-v1.gif) | ![](docs/Acrobot-v1.gif)  | ![](docs/CartPole-v1.gif) | ![](docs/MountainCarContinuous-v0.gif) |
 | ![](docs/Catch-bsuite.gif) | ![](docs/FourRooms-misc.gif)  | ![](docs/MetaMaze-misc.gif) | ![](docs/PointRobot-misc.gif) |
+| ![](docs/Asterix-MinAtar.gif) | ![](docs/Breakout-MinAtar.gif)  | ![](docs/Freeway-MinAtar.gif) | ![](docs/SpaceInvaders-MinAtar.gif) |
 
 ## Speed Up Evaluations for [`gymnax`](https://github.com/RobertTLange/gymnax)
 
