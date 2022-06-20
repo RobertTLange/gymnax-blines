@@ -16,11 +16,13 @@ SpaceInvaders-MinAtar
 "
 
 export bsuite_envs="
-FourRooms-misc
-MetaMaze-misc
-PointRobot-misc
-BernoulliBandit-misc
-GaussianBandit-misc
+Catch-bsuite
+DeepSea-bsuite
+MemoryChain-bsuite
+UmbrellaChain-bsuite
+DiscountingChain-bsuite
+MNISTBandit-bsuite
+SimpleBandit-bsuite
 "
 
 export misc_envs="
@@ -34,7 +36,7 @@ GaussianBandit-misc
 if [[ "$1" == "speed" ]]
 then
     # Loop over environments and estimate runtime speed
-    for env_name in $gym_envs $bsuite_envs $minatar_envs
+    for env_name in $gym_envs $minatar_envs
     do
         python speed.py -env $env_name -np -n_envs 10
         python speed.py -env $env_name -np -n_envs 10 -net
@@ -48,7 +50,7 @@ then
         python speed.py -env $env_name -n_envs 2000 -net -gpu
     done
 
-    for env_name in $misc_envs
+    for env_name in $bsuite_envs $misc_envs
     do
         python speed.py -env $env_name -n_envs 10
         python speed.py -env $env_name -n_envs 10 -net
@@ -59,7 +61,6 @@ then
     done
 
     # TODO: Add bsuite numpy evaluation
-    # TODO: Add minatar numpy evaluation
     # TODO: Add V100S results and TPU evaluation
 elif [[ "$1" == "train" ]]
 then

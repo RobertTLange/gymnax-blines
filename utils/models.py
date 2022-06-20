@@ -32,7 +32,9 @@ def get_model_ready(rng, config, speed=False):
             num_hidden_units=64,
             num_hidden_layers=2,
             hidden_activation="relu",
-            output_activation="categorical",
+            output_activation="categorical"
+            if config.env_name != "PointRobot-misc"
+            else "identity",
             num_output_units=env.num_actions,
         )
 

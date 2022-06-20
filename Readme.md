@@ -71,13 +71,13 @@ For each environment we estimate the seconds required to execute 1 Mio steps on 
 | [`CartPole-v1`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/cartpole.py) | R: 46 <br /> N: 94 | R: 0.43 <br /> N: 1.42 | R: 45 <br /> N: 51 | R: 0.49 <br /> N: 0.98 | R: 0.06 <br /> N: 0.08
 | [`MountainCar-v0`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/mountain_car.py) | R: 48 <br /> N: 105 | R: 0.53 <br /> N: 1.49 | R: 54 <br /> N: 57 | R: 0.39 <br /> N: 1.03 | R: 0.06 <br /> N: 0.09
 | [`MountainCarContinuous-v0`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/classic_control/continuous_mountain_car.py) | R: 117 <br /> N: 99 | R: 0.34 <br /> N: 1.11 | R: 98 <br /> N: 53 | R: 0.28 <br /> N: 0.85 | R: 0.09 <br /> N: 0.12
-| --- | --- | --- | --- | ---| --- | --- | --- |
+|  |  |  |  |  |  |  |  |
 | [`Asterix-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/asterix.py) |
 | [`Breakout-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/breakout.py) |
 | [`Freeway-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/freeway.py) |
 | [`Seaquest-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/seaquest.py) |
 | [`SpaceInvaders-MinAtar`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/minatar/space_invaders.py) |
-| --- | --- | --- | --- | ---| --- | --- | --- |
+|  |  |  |  |  |  |  |  |
 | [`Catch-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/catch.py) |
 | [`DeepSea-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/deep_sea.py) |
 | [`MemoryChain-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/memory_chain.py) |
@@ -85,7 +85,7 @@ For each environment we estimate the seconds required to execute 1 Mio steps on 
 | [`DiscountingChain-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/discounting_chain.py) |
 | [`MNISTBandit-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/mnist.py) |
 | [`SimpleBandit-bsuite`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/bsuite/bandit.py) |
-| --- | --- | --- | --- | ---| --- | --- | --- |
+|  |  |  |  |  |  |  |  |
 | [`FourRooms-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/rooms.py) | -
 | [`MetaMaze-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/meta_maze.py) | -
 | [`PointRobot-misc`](https://github.com/RobertTLange/gymnax/blob/main/gymnax/environments/misc/point_robot.py) | -

@@ -40,13 +40,13 @@ def rollout_episode(env, env_params, model, model_params, max_frames=200):
                 else:
                     action = model.apply(model_params, obs, rng_act)
         else:
-            action = env.action_space(env_params).sample(rng_act)
+            action = 0  # env.action_space(env_params).sample(rng_act)
         next_obs, next_env_state, reward, done, info = env.step(
             rng_step, env_state, action, env_params
         )
         reward_seq.append(reward)
-        # print(t_counter, reward, action, done)
-        # print(10 * "=")
+        print(t_counter, reward, action, done)
+        print(10 * "=")
         t_counter += 1
         if done or t_counter == max_frames:
             break
