@@ -122,6 +122,14 @@ if __name__ == "__main__":
         help="Use gpu if available.",
     )
 
+    parser.add_argument(
+        "-a100",
+        "--a100",
+        action="store_true",
+        default=False,
+        help="Use A100 gpu - store extension.",
+    )
+
     args, _ = parser.parse_known_args()
 
     import os
@@ -147,6 +155,8 @@ if __name__ == "__main__":
     )
 
     conf_name = f"net-{args.use_network}-envs-{args.num_envs}-np-{args.use_np_env}-gpu-{args.use_gpu}"
+    if args.a100:
+        conf_name += "-a100"
     print(conf_name)
     # Write data to pkl file
     fname = f"agents/{args.env_name}/speed.pkl"

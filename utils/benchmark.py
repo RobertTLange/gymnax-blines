@@ -8,7 +8,13 @@ from utils.vec_env.wrapper import make_parallel_env
 def speed_gymnax_random(env_name, num_env_steps, num_envs, rng, env_kwargs):
     """Random episode rollout in gymnax."""
     # Define rollout manager for env
-    manager = RolloutWrapper(None, env_name=env_name, env_kwargs=env_kwargs)
+    if env_name == "Freeway-MinAtar":
+        env_params = {"max_steps_in_episode": 1000}
+    else:
+        env_params = {}
+    manager = RolloutWrapper(
+        None, env_name=env_name, env_params=env_params, env_kwargs=env_kwargs
+    )
 
     # Multiple rollouts for same network (different rng, e.g. eval)
     rng, rng_batch = jax.random.split(rng)
@@ -42,8 +48,15 @@ def speed_gymnax_network(
 ):
     """MLP episode rollout in gymnax."""
     # Define rollout manager for env
+    if env_name == "Freeway-MinAtar":
+        env_params = {"max_steps_in_episode": 1000}
+    else:
+        env_params = {}
     manager = RolloutWrapper(
-        model.apply, env_name=env_name, env_kwargs=env_kwargs
+        model.apply,
+        env_name=env_name,
+        env_params=env_params,
+        env_kwargs=env_kwargs,
     )
 
     # Multiple rollouts for same network (different rng, e.g. eval)

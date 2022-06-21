@@ -153,7 +153,7 @@ class RolloutManager(object):
 
     @partial(jax.jit, static_argnums=(0, 3))
     def batch_evaluate(self, rng_input, train_state, num_envs):
-        """Rollout a pendulum episode with lax.scan."""
+        """Rollout an episode with lax.scan."""
         # Reset the environment
         rng_reset, rng_episode = jax.random.split(rng_input)
         obs, state = self.batch_reset(jax.random.split(rng_reset, num_envs))
@@ -166,7 +166,7 @@ class RolloutManager(object):
             next_o, next_s, reward, done, _ = self.batch_step(
                 jax.random.split(rng_step, num_envs),
                 state,
-                action,
+                action.squeeze(),
             )
             new_cum_reward = cum_reward + reward * valid_mask
             new_valid_mask = valid_mask * (1 - done)
