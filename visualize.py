@@ -102,23 +102,3 @@ if __name__ == "__main__":
     )
     vis = Visualizer(env, env_params, state_seq, cum_rewards)
     vis.animate(f"docs/{args.env_name}.gif")
-
-    # action = int(network(obs).max(1)[1].view(1, 1).squeeze())
-    # import gym
-    # import torch
-    # from evaluate.dqn_torch import QNetwork
-
-    # data_and_weights = torch.load(
-    #     "evaluate/minatar_torch_ckpt/breakout_data_and_weights",
-    #     map_location=lambda storage, loc: storage,
-    # )
-
-    # returns = data_and_weights["returns"]
-    # network_params = data_and_weights["policy_net_state_dict"]
-
-    # env = gym.make("MinAtar/Breakout-v0")
-    # in_channels = env.game.n_channels
-    # num_actions = env.game.num_actions()
-
-    # network = QNetwork(in_channels, num_actions)
-    # network.load_state_dict(network_params)
