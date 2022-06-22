@@ -69,7 +69,7 @@ then
 elif [[ "$1" == "train" ]]
 then
     # Loop over environments and train agents with PPO/ES
-    for env_name in $gym_envs $minatar_envs #$bsuite_envs
+    for env_name in $gym_envs $minatar_envs $bsuite_envs
     do
         python train.py -config agents/$env_name/ppo.yaml --lrate 1e-04
         python train.py -config agents/$env_name/ppo.yaml --lrate 1e-03
@@ -77,10 +77,10 @@ then
         python train.py -config agents/$env_name/es.yaml
     done
 
-    # for env_name in $misc_envs
-    # do
-    #     python train.py -config configs/$env_name/es.yaml
-    # done
+    for env_name in $misc_envs
+    do
+        python train.py -config configs/$env_name/es.yaml
+    done
 
 elif [[ "$1" == "visualize" ]]
 then
