@@ -62,26 +62,14 @@ class BatchManager:
     @partial(jax.jit, static_argnums=0)
     def append(self, buffer, state, action, reward, done, log_pi, value):
         return {
-            "states": jax.ops.index_update(
-                buffer["states"], buffer["_p"], state
-            ),
-            "actions": jax.ops.index_update(
-                buffer["actions"], buffer["_p"], action
-            ),
-            "rewards": jax.ops.index_update(
-                buffer["rewards"], buffer["_p"], reward.squeeze()
-            ),
-            "dones": jax.ops.index_update(
-                buffer["dones"], buffer["_p"], done.squeeze()
-            ),
-            "log_pis_old": jax.ops.index_update(
-                buffer["log_pis_old"], buffer["_p"], log_pi
-            ),
-            "values_old": jax.ops.index_update(
-                buffer["values_old"], buffer["_p"], value
-            ),
-            "_p": (buffer["_p"] + 1) % self.n_steps,
-        }
+                "states":  buffer["states"].at[buffer["_p"]].set(state),
+                "actions": buffer["actions"].at[buffer["_p"]].set(action),
+                "rewards": buffer["rewards"].at[buffer["_p"]].set(reward.squeeze()),
+                "dones": buffer["dones"].at[buffer["_p"]].set(done.squeeze()),
+                "log_pis_old": buffer["log_pis_old"].at[buffer["_p"]].set(log_pi),
+                "values_old": buffer["values_old"].at[buffer["_p"]].set(value),
+                "_p": (buffer["_p"] + 1) % self.n_steps,
+            }
 
     @partial(jax.jit, static_argnums=0)
     def get(self, buffer):
