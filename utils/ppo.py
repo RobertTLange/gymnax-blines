@@ -109,7 +109,7 @@ class RolloutManager(object):
         # Setup functionalities for vectorized batch rollout
         self.env_name = env_name
         self.env, self.env_params = gymnax.make(env_name, **env_kwargs)
-        self.env_params.replace(**env_params)
+        self.env_params = self.env_params.replace(**env_params)
         self.observation_space = self.env.observation_space(self.env_params)
         self.action_size = self.env.action_space(self.env_params).shape
         self.apply_fn = model.apply
@@ -343,7 +343,7 @@ def loss_actor_and_critic(
 
     # TODO: Figure out why training without 0 breaks categorical model
     # And why with 0 breaks gaussian model pi
-    log_prob = pi.log_prob(action[:, -1])
+    log_prob = pi.log_prob(action[..., -1])
 
     value_pred_clipped = value_old + (value_pred - value_old).clip(
         -clip_eps, clip_eps
@@ -353,7 +353,8 @@ def loss_actor_and_critic(
     value_loss = 0.5 * jnp.maximum(value_losses, value_losses_clipped).mean()
 
     ratio = jnp.exp(log_prob - log_pi_old)
-    gae = (gae - gae.mean()) / (gae.std() + 1e-8)
+    gae_mean = gae.mean()
+    gae = (gae - gae_mean) / (gae.std() + 1e-8)
     loss_actor1 = ratio * gae
     loss_actor2 = jnp.clip(ratio, 1.0 - clip_eps, 1.0 + clip_eps) * gae
     loss_actor = -jnp.minimum(loss_actor1, loss_actor2)
@@ -371,7 +372,7 @@ def loss_actor_and_critic(
         entropy,
         value_pred.mean(),
         target.mean(),
-        gae.mean(),
+        gae_mean,
     )
 
 
